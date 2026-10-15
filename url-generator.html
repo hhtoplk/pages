@@ -29,8 +29,8 @@ function generate() {
   const base64 = btoa(unescape(encodeURIComponent(payload)));
 
   document.getElementById("result").value =
-    '&xml=data:video/mp4;base64,' + base64 +
-    '&id=' + encodeURIComponent(id);
+  '&xml=data:video/mp4;base64,' + base64 +
+  '&id=' + encodeURIComponent(id);
 }
 
 function copyUrl() {
