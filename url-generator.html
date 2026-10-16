@@ -2,87 +2,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>XML Base64 URL Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 850px;
-      margin: 30px auto;
-      padding: 15px;
-    }
-    input, textarea, button {
-      box-sizing: border-box;
-      width: 100%;
-      margin: 8px 0 16px;
-      padding: 12px;
-    }
-    textarea { min-height: 110px; }
-    button { cursor: pointer; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XML URL Generator</title>
+<style>
+body{font-family:Arial;max-width:850px;margin:30px auto;padding:15px}
+input,textarea,button{box-sizing:border-box;width:100%;padding:12px;margin:8px 0 16px}
+textarea{min-height:110px}
+</style>
 </head>
 <body>
-  <h2>XML Base64 URL Generator</h2>
+<h2>XML Base64 URL Generator</h2>
 
-  <label for="xmlUrl">XML File URL</label>
-  <input id="xmlUrl"
-    value="https://hhtoplk.github.io/pages/tour/m.xml">
+<label>XML File URL</label>
+<input id="xmlUrl" value="https://hhtoplk.github.io/pages/tour/m.xml">
 
-  <label for="pageId">ID</label>
-  <input id="pageId" placeholder="Enter your ID">
+<label>HTML File ID</label>
+<input id="pageId" placeholder="asdrfsdrfgthfgh">
 
-  <button id="generate">Generate URL</button>
+<button id="generate">Generate URL</button>
 
-  <label for="result">Generated URL</label>
-  <textarea id="result" readonly></textarea>
-  <button id="copy">Copy URL</button>
+<label>Generated URL</label>
+<textarea id="result" readonly></textarea>
+<button id="copy">Copy URL</button>
 
-  <script>
-    const xmlInput = document.getElementById("xmlUrl");
-    const idInput = document.getElementById("pageId");
-    const result = document.getElementById("result");
+<script>
+const $ = id => document.getElementById(id);
 
-    document.getElementById("generate").addEventListener("click", () => {
-      const xmlUrl = xmlInput.value.trim();
-      const id = idInput.value.trim();
+$("generate").onclick = () => {
+  const xmlUrl = $("xmlUrl").value.trim();
+  const id = $("pageId").value.trim();
 
-      if (!xmlUrl || !id) {
-        alert("XML URL and ID both are required.");
-        return;
-      }
+  if (!xmlUrl || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+    alert("Enter a valid XML URL and HTML File ID.");
+    return;
+  }
 
-      try {
-        new URL(xmlUrl);
-      } catch {
-        alert("Please enter a valid XML URL.");
-        return;
-      }
+  try {
+    new URL(xmlUrl);
+  } catch {
+    alert("Enter a valid XML URL.");
+    return;
+  }
 
-      const xml = `<krpano><include url="${xmlUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}"/></krpano>`;
-      const base64 = btoa(xml);
-      result.value =
-        "&xml=data:video/mp4;base64," +
-        base64 +
-        "&id=" +
-        encodeURIComponent(id);
-    });
+  const xml =
+    '<krpano version="1.0.8.15">' +
+    '<include url="' +
+    xmlUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;") +
+    '"/>' +
+    '<data name="requested_html_id">' + id + '</data>' +
+    '</krpano>';
 
-    document.getElementById("copy").addEventListener("click", async () => {
-      if (!result.value) {
-        alert("Generate a URL first.");
-        return;
-      }
+  const base64 = btoa(xml);
 
-      try {
-        await navigator.clipboard.writeText(result.value);
-        alert("URL copied.");
-      } catch {
-        result.select();
-        document.execCommand("copy");
-        alert("Copy attempted. Check the result field.");
-      }
-    });
-  </script>
+  $("result").value =
+    "&xml=data:video/mp4;base64," + base64 +
+    "&id=" + encodeURIComponent(id);
+};
+
+$("copy").onclick = async () => {
+  if (!$("result").value) {
+    alert("Generate a URL first.");
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText($("result").value);
+    alert("Copied.");
+  } catch {
+    $("result").select();
+    document.execCommand("copy");
+  }
+};
+</script>
 </body>
 </html>
