@@ -1,43 +1,75 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>XML URL Generator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTML File Loader</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      overflow-wrap: anywhere;
+    }
+  </style>
 </head>
 <body>
-<h2>XML URL Generator</h2>
+  <p id="status">Loading HTML file...</p>
 
-<label>XML URL:</label><br>
-<input id="xmlUrl" value="https://hhtoplk.github.io/pages/tour/m.xml" style="width:90%"><br><br>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
 
-<label>ID:</label><br>
-<input id="videoId" value="video-man-city-v-psg-match-lie-yvackqi" style="width:90%"><br><br>
+    const apiURL =
+      "https://api.github.com/repos/hhtoplk/pages/contents/tour/html-filse";
 
-<button onclick="generate()">Generate URL</button><br><br>
-<textarea id="result" rows="5" style="width:90%"></textarea><br><br>
-<button onclick="copyUrl()">Copy URL</button>
+    async function loadHTML() {
+      const status = document.getElementById("status");
 
-<script>
-function generate() {
-  const xmlUrl = document.getElementById("xmlUrl").value.trim();
-  const id = document.getElementById("videoId").value.trim();
+      if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+        status.textContent = "Please provide a valid HTML file ID in the URL.";
+        return;
+      }
 
-  const payload = '<krpano><include url="' +
-    xmlUrl.replace(/&/g, '&amp;') +
-    '"/></krpano>';
+      try {
+        const response = await fetch(apiURL);
 
-  const base64 = btoa(unescape(encodeURIComponent(payload)));
+        if (!response.ok) {
+          throw new Error("Could not retrieve the folder file list.");
+        }
 
-  document.getElementById("result").value =
-  '&xml=data:video/mp4;base64,' + base64 +
-  '&id=' + encodeURIComponent(id);
-}
+        const files = await response.json();
 
-function copyUrl() {
-  const result = document.getElementById("result");
-  result.select();
-  document.execCommand("copy");
-}
-</script>
+        const match = files.find(file =>
+          file.type === "file" &&
+          file.name.toLowerCase() === (id + ".html").toLowerCase()
+        );
+
+        if (!match) {
+          throw new Error("No matching HTML file was found.");
+        }
+
+        const pageURL =
+          "./" + encodeURIComponent(match.name);
+
+        const pageResponse = await fetch(pageURL);
+
+        if (!pageResponse.ok) {
+          throw new Error("Could not load the HTML file.");
+        }
+
+        const html = await pageResponse.text();
+
+        document.open();
+        document.write(html);
+        document.close();
+
+      } catch (error) {
+        status.textContent = error.message;
+      }
+    }
+
+    loadHTML();
+  </script>
 </body>
 </html>
